@@ -4,4 +4,3 @@ __pycache__/
 *.txt
 !requirements.txt
 *.json
-report/
