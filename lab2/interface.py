@@ -9,7 +9,6 @@ import os
 import time
 
 
-
 class Interface:
 	"""
 	Графический интерфейс для тестирования псведослучайных последовательностей.
@@ -18,7 +17,7 @@ class Interface:
 	Включает главное меню, меню запуска тестов, справку и настройки.
 
 	Attributes:
-		console (Console): Объект для работы с консольным выводом (библиотека rich)
+		console: Объект для работы с консольным выводом (библиотека rich)
 		config_path: Путь к файлу конфигурации
 		config: Загруженная конфигурация программы
 	"""
@@ -30,8 +29,11 @@ class Interface:
 		self.config_path = "/home/v_vedin/university/labs/FouthCourse/FirstTerm/Information-Security/lab1/config.json"
 		with open(self.config_path, "r", encoding="utf-8") as f:
 				self.config = json.load(f)
+		self.generator = Generator()
 		self.generators_fns = {
-			"QCG" : Generator.quadratic_congruential_generator,
+			"1": ("Квадратичный Конгруэтный Генератор", self.generator.quadratic_congruential_generator),
+			"2": ("Blum-Blum-Shub", self.generator.bbs_generator), 
+			"3": ("Yarrow-160", self.generator.yarrow160_generator)
 		}
 	
 	def print_title(self) -> None:
@@ -48,7 +50,7 @@ class Interface:
 				  'учреждение высшего образования "Ульяновский ' \
 				  'государственный технический университет"', style="blue")
 		self.console.print(
-			"\nЛабораторная Работа №1\n" \
+			"\nЛабораторная Работа №2\n" \
 			"Дисциплина: Информационная Безопасность\n" \
 			"Работа выполнена студентом группы ИВТАСбд-41 Ведином Владимиром Александровичом\n",
 			justify="center"
@@ -102,6 +104,7 @@ class Interface:
 		Запускает процесс тестирования последовательности битов.
 
 		Если не указан входной файл, запрашивает длину генерируемой последовательности.
+		Затем зарашивает тип генератора из предложенных вариантов на выбор
 
 		Выполняет тесты и отображает результаты:
 		- Выводит саму последовательность
@@ -127,10 +130,27 @@ class Interface:
 				default="10000"
 			))
 		self.console.clear()
+		self.console.rule(style="blue")
+		print(Panel.fit(
+			"[bold cyan]  Выберите генератор [/bold cyan]",
+			style="cyan",
+		))
+		self.console.rule(style="blue")
 
-		self.console.rule("Результаты тестов", style="blue")
+		print(f"1. {self.generators_fns["1"][0]}")
+		print(f"2. {self.generators_fns["2"][0]}")
+		print(f"3. {self.generators_fns["3"][0]}")
+		generator = (Prompt.ask(
+			"[bold yellow]Выберите пункт[/bold yellow]",
+			choices=["1", "2", "3"],
+			default="1"
+		))
+		
+		self.console.clear()
 
-		bit_seq, test_data = run_tests(self.generators_fns["QCG"], seq_len)
+		self.console.rule(f"Результаты тестов {self.generators_fns[generator][0]}", style="blue")
+
+		bit_seq, test_data = run_tests(seq_len, self.config_path, self.generators_fns[generator][1])
 		print("Вывод битов...")
 		if self.config["input_file_path"] != "":
 			print(
@@ -157,11 +177,9 @@ class Interface:
 
 			if res == False:
 				print("Последовательность не случайна")
-				Prompt.ask(
-					"[bold yellow]Нажмите любую кнопку, чтобы вернуться в главное меню[/bold yellow]"
-				)
 				break
-		print("Все тесты пройдены, последовательность случайна")
+		else:
+			print("Все тесты пройдены, последовательность случайна")
 		Prompt.ask(
 				"[bold yellow]Нажмите любую кнопку, чтобы вернуться в главное меню[/bold yellow]"
 		)
@@ -193,12 +211,18 @@ class Interface:
 		)
 		print(
 			"Саму последовательность любой длинны (на выбор пользователя) можно как случайно генерировать" \
-			" так и считывать из файла, путь до кторого пользователь может указать\n" \
+			" с помощью заданных на выбор генераторов так и считывать из файла, путь до кторого пользователь может указать\n" \
 			"Также, саму последовательность можно и сохранить в файл, снова указав до него путь\n" \
 			"Указать путь до входного и выходного файла можно в настройках\n\n"
 		)
 		print(
-			"Тесты проводятся по очереди (от 1 до 3, как указано выше). Если какой-то из тестов не проходит, то остальные не проводятся\n"
+			"Тесты проводятся по очереди (от 1 до 3, как указано выше). Если акой-то из тестов не проходит, то остальные не проводятся\n"
+		)
+		print(
+			"Генераторы данные на выбор:\n" \
+			"\t1. Квадратичный Конгруэнтный генератор\n" \
+			"\t2. BBS (Blum-Blum-Shub) генератор\n" \
+			"\t3. Yarrow160 генератор\n"
 		)
 
 		self.console.rule(style="blue")

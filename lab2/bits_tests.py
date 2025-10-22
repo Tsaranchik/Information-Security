@@ -15,9 +15,10 @@ def generate_bit_seq(
 		seed: int = 42
 ) -> list[int]:
 	"""
-	Генерирует или загружает последовательность битов (0 и 1).
+	Вызывает функцию выбранного генератора или загружает последовательность битов (0 и 1).
 
 	Args:
+		generator_fn: Функция выбранного генератора
 		seq_len: Длина генерируемой последовательности (по умолчанию 10000 бит)
 		input_file_path: Путь к файлу для загрузки последовательности
 		output_file_path: Путь для сохранения последовательности
@@ -31,14 +32,13 @@ def generate_bit_seq(
 		Иначе генерируется случайная последовательность заданной длины.
 	"""
 	bit_seq = None
-	generator = Generator(seq_len, seed)
 
 	if input_file_path != "":
 		with open(input_file_path, "r", encoding="utf-8") as f:
 			bit_seq = list(f.read())
 			bit_seq = [int(bit) for bit in bit_seq]
 
-	bit_seq = generator.generator_fn if bit_seq is None else bit_seq
+	bit_seq = generator_fn(seq_len) if bit_seq is None else bit_seq
 
 	if output_file_path != "":
 		with open(output_file_path, "w", encoding="utf-8") as f:
