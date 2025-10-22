@@ -2,6 +2,8 @@ import random
 import hashlib
 import time
 import os
+import sympy
+import math
 from Crypto.Cipher import DES
 
 
@@ -61,16 +63,36 @@ class Generator:
 		Returns:
 			List[int]: список битов (0 и 1)
 		"""
-		p = 30011
-		q = 40031
-		n = p * q
-		seed = random.randint(2, n-1)
+		def generate_prime() -> int:
+			"""
+			Функция, генерирующая простое число длинной 160 бит.
 
-		x_prev = (seed ** 2) % n
+			С помощью функции randprime из библиотеки sympy генерирует 
+			простое число в диапазаоне от 2^159 до 2^160.
+
+			Returns:
+				int: большое простое число, удовлетворяющее условию: `prime ≡ 3 (mod 4)`
+			"""
+			bit_len = 160
+			while True:
+				prime = sympy.randprime(2**(bit_len - 1), 2**bit_len)
+				if prime % 4 == 3:
+					return prime
+		
+		p = generate_prime() 
+		q = generate_prime()
+		n = p * q
+		
+		while True:
+			seed = random.randint(2, n-1)
+			if math.gcd(seed, n) == 1:
+				break
+
+		x_prev = pow(seed, 2, n)
 		bit_seq = []
 
 		for _ in range(seq_len):
-			x_next = (x_prev ** 2) % n
+			x_next = pow(x_prev, 2, n)
 			bit = x_next & 1
 			bit_seq.append(bit)
 			x_prev = x_next
