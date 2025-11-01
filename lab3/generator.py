@@ -140,6 +140,7 @@ class Generator:
 			self.curPt = Pt
 			self.C = 0
 			self.t = 0
+			self.counter = 0
 
 			if seed is not None:
 				if isinstance(seed, int):
@@ -156,7 +157,7 @@ class Generator:
 				
 				self.K = hashlib.sha1(seed_bytes).digest()[:8]
 			else:
-				self.K = os.urandom(8)
+				self.K = b'\x01' * 8
 
 				
 		def entropy_accumulator(self) -> bytes:
@@ -169,7 +170,8 @@ class Generator:
 			Returns:
 				bytes: SHA-1 хеш от собранных жнтропийных данных
 			"""
-			data = f"{time.time_ns()}_{os.getpid()}_{os.urandom(8).hex()}".encode()
+			self.counter += 1
+			data = self.K + self.C.to_bytes(8, 'big') + self.counter.to_bytes(8, 'big')
 			return hashlib.sha1(data).digest()
 
 		

@@ -56,12 +56,14 @@ class StreamCipher:
 		seed_int = int.from_bytes(hashlib.sha256(seed_data).digest()[:4], 'big')
 		seed_bytes = hashlib.sha256(seed_data).digest()
 
+		needed_bits = int(length * 8 * 1.1)
+
 		if generator_type == 'quadratic':
-			bits = self.generator.quadratic_congruential_generator(length * 8, seed_int)
+			bits = self.generator.quadratic_congruential_generator(needed_bits, seed_int)
 		elif generator_type == 'bbs':
-			bits = self.generator.bbs_generator(length * 8, seed_int)
+			bits = self.generator.bbs_generator(needed_bits, seed_int)
 		elif generator_type == 'yarrow160':
-			bits = self.generator.yarrow160_generator(length * 8, seed_bytes)
+			bits = self.generator.yarrow160_generator(needed_bits, seed_bytes)
 		else:
 			raise ValueError(f"Неизвестный тип генератора: {generator_type}")
 
@@ -72,11 +74,13 @@ class StreamCipher:
 	def _bits_to_bytes(self, bits: list) -> bytes:
 		bytes_list = []
 
-		for i in range(0, len(bits), 8):
+		num_bytes = len(bits) // 8
+
+		for i in range(num_bytes):
 			byte = 0
 			for j in range(8):
 				if i + j < len(bits):
-					byte = (byte << 1) | bits[i + j]
+					byte = (byte << 1) | bits[i * 8 + j]
 			bytes_list.append(byte)
 		
 		return bytes(bytes_list)
