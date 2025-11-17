@@ -95,7 +95,8 @@ class Interface:
 		))
 
 		input_file = Prompt.ask(
-			"[bold yellow]Введите путь к файлу для шифрования[/bold yellow]"
+			"[bold yellow]Введите путь к файлу для шифрования[/bold yellow]",
+			default=self.config.get("input_file_path", "")
 		)
 		
 		if not os.path.exists(input_file):
@@ -103,10 +104,15 @@ class Interface:
 			Prompt.ask("[bold yellow]Нажмите любую кнопку чтобы продолжить[/bold yellow]")
 
 			return
+		
+		self.config["input_file_path"] = input_file
 
 		output_file = Prompt.ask(
-			"[bold yellow]Введите путь для сохранения зашифрованного файла[/bold yellow]"
+			"[bold yellow]Введите путь для сохранения зашифрованного файла[/bold yellow]",
+			default=self.config.get("output_file_path", "")
 		)
+
+		self.config["output_file_path"] =output_file
 
 		password = Prompt.ask(
 			"[bold yellow]Введите пароль для шифрования[/bold yellow]",
@@ -142,6 +148,9 @@ class Interface:
 		else:
 			print("[red]Ошибка при шифровании файла![/red]")
 		
+		with open(self.config_path, "w", encoding='utf-8') as f:
+			json.dump(self.config, f, indent=4)
+		
 		Prompt.ask("\n[bold yellow]Нажмите любую кнопку чтобы продолжить[/bold yellow]")
 	
 	def decrypt_menu(self) -> None:
@@ -154,7 +163,8 @@ class Interface:
 		))
 
 		input_file = Prompt.ask(
-			"[bold yellow]Введите путь к зашифрованному файлу[/bold yellow]"
+			"[bold yellow]Введите путь к зашифрованному файлу[/bold yellow]",
+			default=self.config.get("output_file_path", "")
 		)
 
 		if not os.path.exists(input_file):
@@ -164,7 +174,8 @@ class Interface:
 			return
 
 		output_file = Prompt.ask(
-			"[bold yellow]Введите путь для сохранения дешифрованного файла[/bold yellow]"
+			"[bold yellow]Введите путь для сохранения дешифрованного файла[/bold yellow]",
+			default=self.config.get("output_file_path", "")
 		)
 
 		password = Prompt.ask(
@@ -199,6 +210,9 @@ class Interface:
 			
 		else:
 			print("[red]Ошибка при дешифровании файла![/red]")
+		
+		with open(self.config_path, "w", encoding='utf-8') as f:
+			json.dump(self.config, f, indent=4)
 		
 		Prompt.ask("[bold yellow]Нажмите любую кнопку чтобы продолжить[/bold yellow]")
 	
