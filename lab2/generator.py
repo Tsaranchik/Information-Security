@@ -78,9 +78,12 @@ class Generator:
 				prime = sympy.randprime(2**(bit_len - 1), 2**bit_len)
 				if prime % 4 == 3:
 					return prime
-		
-		p = generate_prime() 
-		q = generate_prime()
+		p = 0
+		q = 0
+		while (p == q):
+			p = generate_prime() 
+			q = generate_prime()
+			
 		n = p * q
 		
 		while True:
@@ -140,7 +143,7 @@ class Generator:
 			PID процесса и случайных байт.
 
 			Returns:
-				bytes: SHA-1 хеш от собранных жнтропийных данных
+				bytes: SHA-1 хеш от собранных энтропийных данных
 			"""
 			data = f"{time.time_ns()}_{os.getpid()}_{os.urandom(8).hex()}".encode()
 			return hashlib.sha1(data).digest()
